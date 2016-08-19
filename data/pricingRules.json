@@ -1,8 +1,6 @@
-[
-  {
-    "deal": "xForPriceOfYDeal",
-    "sku": "atv",
-    "x": 3,
-    "y": 2
+{
+  "freeItem" : {
+    "triggerSku": "mbp",
+    "freeItemSku": "vga"
   }
-]
+}
