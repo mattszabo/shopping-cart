@@ -6,7 +6,7 @@ var shoppingCart = [];
 shoppingCart = co.scan(shoppingCart, 'atv');
 shoppingCart = co.scan(shoppingCart, 'atv');
 shoppingCart = co.scan(shoppingCart, 'ipd');
-var total = co.total(shoppingCart, pricingRules);
+var total = 0;//co.total(shoppingCart);
 
 console.log('Purchased items: ')
 console.log(shoppingCart);

@@ -1,8 +1,15 @@
 var inventory = require('../data/inventory.json');
+var pricingRules = require('../data/pricingRules.json');
 
 function scan(shoppingCart, sku) {
 
   var newShoppingCart = copyCart(shoppingCart);
+  newShoppingCart = addItemToCartFromSku(newShoppingCart, sku);
+  
+  return newShoppingCart;
+}
+
+function addItemToCartFromSku(newShoppingCart, sku) {
   var isNewItem = true;
 
   // check to see if we can incrememnt the count of the new item
@@ -20,7 +27,7 @@ function scan(shoppingCart, sku) {
     item.count = 1;
     newShoppingCart.push(item);
   }
-  
+
   return newShoppingCart;
 }
 
@@ -43,12 +50,23 @@ function copyCart(shoppingCart) {
   return newShoppingCart;
 }
 
-function total(shoppingCart, pricingRules) {
-  var skuWithDeal = [];
-  for(var i = 0; i < pricingRules.length; i++) {
-    skuWithDeal.push(pricingRules[i]["sku"])
+function total(shoppingCart) {
+  for(var i = 0; i < shoppingCart.length; i++) {
+    total += getItemLineTotal(shoppingCart[0]);
   }
-  return skuWithDeal;
+  return total;
+}
+
+function getItemLineTotal(item) {
+  return item["total"]
+}
+
+function getItemCodesWithDeals(pricingRules) {
+  var skuList = []
+  for(var i = 0; i < pricingRules.length; i++) {
+    skuList.push(pricingRules[i]["sku"]);
+  }
+  return skuList;
 }
 
 module.exports.scan = scan;
