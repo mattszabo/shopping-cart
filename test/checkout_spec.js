@@ -9,7 +9,8 @@ var inventory = [
   { "sku": "vga", "name": "VGA adapter", "price": 30.00 }
 ];
 var pricingRules = {
-  "freeItem" : { "triggerSku": "mbp", "freeItemSku": "vga" }
+  "freeItem": { "triggerSku": "mbp", "freeItemSku": "vga" },
+  "xForPriceOfY": { "triggerSku": "atv", "x": 3, "y": 2 }
 }
 
 // var co = new Checkout(inventory, pricingRules);
@@ -60,7 +61,7 @@ describe('Checkout logic', () => {
       var co = new Checkout(inventory, pricingRules);
 
       co.scan('mbp');
-      expect(co.total()).to.equal(1399.99)
+      expect(co.total()).to.equal(1399.99);
     });
 
     it('Calculates multiple item cost', () => {
@@ -70,7 +71,7 @@ describe('Checkout logic', () => {
       co.scan('ipd');
       co.scan('atv');
 
-      expect(co.total()).to.equal(1399.99+549.99+109.50)
+      expect(co.total()).to.equal(1399.99+549.99+109.50);
     });
 
     it('Deducts free item price based on pricing rules', () => {
@@ -79,7 +80,17 @@ describe('Checkout logic', () => {
       co.scan('mbp');
       co.scan('vga');
 
-      expect(co.total()).to.equal(1399.99)
+      expect(co.total()).to.equal(1399.99);
+    })
+
+    it('Applies the x for the price of y rule', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      co.scan('atv');
+      co.scan('atv');
+      co.scan('atv');
+
+      expect(co.total()).to.equal(109.5 * 2);
     })
   });
 

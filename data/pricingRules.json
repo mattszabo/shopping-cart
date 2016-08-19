@@ -1,6 +1,5 @@
 {
-  "freeItem" : {
-    "triggerSku": "mbp",
-    "freeItemSku": "vga"
-  }
+  "freeItem": { "triggerSku": "mbp", "freeItemSku": "vga" },
+  "xForPriceOfY": { "triggerSku": "atv", "x": 3, "y": 2 },
+  "bulkDiscount": { "triggerSku": "ipd", "minItemCount": 4, "discountPrice": 499.99}
 }

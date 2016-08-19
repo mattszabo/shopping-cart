@@ -12,26 +12,71 @@ module.exports = function Checkout(inventory, pricingRules) {
   this.scan = function scan(sku) {
     var item = this.getItemFromSku(sku);
 
-    this.shoppingCart.push(item);
+    this.getShoppingCart().push(item);
     if(this.freeItemList.indexOf(sku) < 0 ) {
       this.totalPrice += item["price"];
     }
 
-    this.checkForFreeItemFlag(sku);
+    this.applyPricingDeals(sku);
+  }
+
+  this.applyPricingDeals = function applyPricingDeals(sku) {
+    for (var key in this.pricingRules) {
+      var rule = this.pricingRules[key];
+      if(key === 'freeItem') {
+        if(rule['triggerSku'] === sku) {
+          this.addToFreeItemList(rule['freeItemSku'])
+        }
+      } else if (key === 'xForPriceOfY') {
+        if(rule['triggerSku'] === sku) {
+          var x = rule['x'];
+          var y = rule['y'];
+          this.applyXForPriceOfY(x, y, sku)
+        }
+      } else if (key === 'bulkDiscount') {
+        if(rule['triggerSku'] === sku) {
+          var minItemCount = rule["minItemCount"];
+          var discountPrice = rule["discountPrice"];
+          this.applyBulkDiscount(minItemCount, discountPrice, sku);
+        }
+      }
+    }
+  }
+
+  this.applyBulkDiscount = function applyBulkDiscount(minItemCount, discountPrice, sku) {
+    var itemCount = this.getCountOfSkuInCart(sku);
+    var item;
+    item = this.getItemFromSku(sku);
+    priceDifference = item["price"] - discountPrice;
+    if (itemCount === x) {
+      totalPrice -= (priceDifference * x);
+    } else if (itemCount > x) {
+      totalPrice -= priceDifference;
+    }
+  }
+
+  this.applyXForPriceOfY = function applyXForPriceOfY(x, y, sku) {
+    var itemCount = this.getCountOfSkuInCart(sku);
+    if(itemCount % x === 0) {
+      var item = this.getItemFromSku(sku);
+      var itemPricetoSubtract = ((x - y) * item["price"]);
+      this.totalPrice -= itemPricetoSubtract;
+    }
+  }
+
+  this.getCountOfSkuInCart = function getCountOfSkuInCart(sku) {
+    var count = 0;
+    var cart = this.getShoppingCart();
+    for(var i = 0; i < cart.length; i++ ) {
+      if(sku === cart[i]["sku"]) {
+        count++;
+      }
+    }
+    return count;
   }
 
   this.getShoppingCart = function getShoppingCart() {
     return this.shoppingCart;
-  }
-
-  this.checkForFreeItemFlag = function checkForFreeItem(sku) {
-    for (var key in this.pricingRules) {
-      if(key === 'freeItem') {
-        if(this.pricingRules[key]['triggerSku'] === sku) {
-          this.addToFreeItemList(this.pricingRules[key]['freeItemSku'])
-        }
-      }
-    }
   }
 
   this.addToFreeItemList = function(sku) {
@@ -52,27 +97,3 @@ module.exports = function Checkout(inventory, pricingRules) {
   }
 
 }
-
-
-//
-// function total(shoppingCart) {
-//   for(var i = 0; i < shoppingCart.length; i++) {
-//     total += getItemLineTotal(shoppingCart[0]);
-//   }
-//   return total;
-// }
-//
-// function getItemLineTotal(item) {
-//   return item["total"]
-// }
-//
-// function getItemCodesWithDeals(pricingRules) {
-//   var skuList = []
-//   for(var i = 0; i < pricingRules.length; i++) {
-//     skuList.push(pricingRules[i]["sku"]);
-//   }
-//   return skuList;
-// }
-
-// module.exports.Checkout = Checkout;
-// module.exports.total = total;
