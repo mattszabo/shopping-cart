@@ -1,20 +1,26 @@
 var inventory = require('../data/inventory.json');
 
 function scan(shoppingCart, sku) {
-  var newShoppingCart = shoppingCart;
-  var newItem = true;
-  for( var i = 0; i < newShoppingCart["items"].length; i++) {
-    var currentItem = newShoppingCart["items"][i];
+
+  var newShoppingCart = copyCart(shoppingCart);
+  var isNewItem = true;
+
+  // check to see if we can incrememnt the count of the new item
+  for(var i = 0; i < newShoppingCart.length; i++) {
+    var currentItem = newShoppingCart[i];
     if(sku === currentItem["sku"]) {
-      newItem = false;
+      isNewItem = false;
       currentItem.count = currentItem.count + 1
     }
   }
-  if(newItem) {
+
+  // add the new item if we haven't previously seen it
+  if(isNewItem) {
     var item = getItemFromSku(sku, inventory);
     item.count = 1;
-    newShoppingCart["items"].push(item);
+    newShoppingCart.push(item);
   }
+  
   return newShoppingCart;
 }
 
@@ -25,6 +31,16 @@ function getItemFromSku(sku, inventory) {
     }
   }
   return "Item not found";
+}
+
+// Creates a new shopping cart without mutating the old one.
+// This is useful when developping with tools like redux.
+function copyCart(shoppingCart) {
+  var newShoppingCart = [];
+  for(var i = 0; i < shoppingCart.length; i++) {
+    newShoppingCart.push(shoppingCart[i]);
+  }
+  return newShoppingCart;
 }
 
 function total(shoppingCart, pricingRules) {
