@@ -5,30 +5,37 @@ module.exports = function Checkout(inventory, pricingRules) {
 
   this.inventory = inventory;
   this.pricingRules = pricingRules;
-  
-  this.scan = function scan(shoppingCart, sku) {
+  this.freeItemList = []
+  this.shoppingCart = [];
+  this.totalPrice = 0;
 
-    var newShoppingCart = this.copyCart(shoppingCart);
+  this.scan = function scan(sku) {
     var item = this.getItemFromSku(sku);
 
-    newShoppingCart.push(item);
-
-    var freeItem = this.checkForFreeItem(sku);
-    if(!!freeItem) {
-      newShoppingCart.push(freeItem)
+    this.shoppingCart.push(item);
+    if(this.freeItemList.indexOf(sku) < 0 ) {
+      this.totalPrice += item["price"];
     }
 
-    return newShoppingCart;
+    this.checkForFreeItemFlag(sku);
   }
 
-  this.checkForFreeItem = function checkForFreeItem(sku) {
+  this.getShoppingCart = function getShoppingCart() {
+    return this.shoppingCart;
+  }
+
+  this.checkForFreeItemFlag = function checkForFreeItem(sku) {
     for (var key in this.pricingRules) {
       if(key === 'freeItem') {
         if(this.pricingRules[key]['triggerSku'] === sku) {
-          return this.getItemFromSku(this.pricingRules[key]['freeItemSku'])
+          this.addToFreeItemList(this.pricingRules[key]['freeItemSku'])
         }
       }
     }
+  }
+
+  this.addToFreeItemList = function(sku) {
+    this.freeItemList.push(sku);
   }
 
   this.getItemFromSku = function getItemFromSku(sku) {
@@ -39,15 +46,11 @@ module.exports = function Checkout(inventory, pricingRules) {
     }
     return "Item not found";
   }
-  // Creates a new shopping cart without mutating the old one.
-  // This is useful when developping with tools like redux.
-  this.copyCart = function copyCart(shoppingCart) {
-    var newShoppingCart = [];
-    for(var i = 0; i < shoppingCart.length; i++) {
-      newShoppingCart.push(shoppingCart[i]);
-    }
-    return newShoppingCart;
+
+  this.total = function total() {
+    return this.totalPrice;
   }
+
 }
 
 

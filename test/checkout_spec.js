@@ -1,72 +1,86 @@
+var chai = require('chai');
+var expect = chai.expect;
+
 var Checkout = require('../src/checkout.js');
-var inventory = require('../data/inventory.json');
-var pricingRules = {}
-
-var co = new Checkout(inventory, pricingRules);
-
-// BASIC TESTS
-console.log("Test scanning first new item");
-var shoppingCart = co.scan([], 'ipd');
-if(shoppingCart.length != 1) {
-  console.log("Failed. There should only be one item, not: ", shoppingCart.length);
-}
-if(shoppingCart[0]["sku"] === 'ipd') {
-  console.log("Success: First item successfully scanned: ");
-  console.log(shoppingCart);
-} else {
-  console.log("Failed. Expected to scan 1 item with sku 'ipd'. Instead scanned:\n", shoppingCart[0]);
+var inventory = [
+  { "sku": "ipd", "name": "Super iPad", "price": 549.99 },
+  { "sku": "mbp", "name": "MacBook Pro", "price": 1399.99 },
+  { "sku": "atv", "name": "Apple TV", "price": 109.50 },
+  { "sku": "vga", "name": "VGA adapter", "price": 30.00 }
+];
+var pricingRules = {
+  "freeItem" : { "triggerSku": "mbp", "freeItemSku": "vga" }
 }
 
-console.log("\nTest scan second new item");
-shoppingCart = co.scan(shoppingCart, 'mbp');
-if(shoppingCart.length != 2) {
-  console.log("Failed. There should be two item entries, not: ", shoppingCart.length);
-}
-if(shoppingCart[0]["sku"] === 'ipd' && shoppingCart[1]["sku"] === 'mbp') {
-  console.log("Success: new sku scanned: ");
-  console.log(shoppingCart);
-} else {
-  console.log("Failed. Expected to scan duplicate sku 'ipd' and increment count. Instead resulted in:\n", shoppingCart[0]);
-}
+// var co = new Checkout(inventory, pricingRules);
 
-console.log("\nTest adding second new item");
-shoppingCart = co.scan(shoppingCart, 'ipd');
-if(shoppingCart.length != 3) {
-  console.log("Failed. There should now be 3 item entries, not: ", shoppingCart.length);
-}
-if(  shoppingCart[0]["sku"] === 'ipd'  && shoppingCart[1]["sku"] === 'mbp' && shoppingCart[2]["sku"] === 'ipd') {
-  console.log("Success: duplicate sku scanned, added to list");
-  console.log(shoppingCart);
-} else {
-  console.log("Failed. Expected to see two items. Instead resulted in:\n", shoppingCart);
-}
+describe('Checkout logic', () => {
+  describe('Scanning Items', () => {
 
-// FREE ITEM TEST
-pricingRules = {
-  "freeItem" : {
-    "triggerSku": "mbp",
-    "freeItemSku": "vga"
-  }
-}
+    it('adds a single item to the shopping cart with correct sku', () => {
+      var co = new Checkout(inventory, pricingRules);
 
-co = new Checkout(inventory, pricingRules);
-console.log("\nTest scanning item that adds a free item");
-shoppingCart = co.scan([], 'mbp');
-if(shoppingCart.length != 2) {
-  console.log("Failed. There should be 2 items, not: ", shoppingCart.length);
-}
-if(shoppingCart[0]["sku"] === 'mbp' && shoppingCart[1]["sku"] === 'vga') {
-  console.log("Success: 1 item scanned resulting in 1 item plus a free item: ");
-  console.log(shoppingCart);
-} else {
-  console.log("Failed. Expected to see 2 items with sku 'mbp' and 'vga'. Instead found:\n", shoppingCart[0]);
-}
+      co.scan('ipd');
 
-// TOTAL TEST
-pricingRules = {}
-co = new Checkout(inventory, pricingRules);
-console.log('\nTest tallying total');
-shoppingCart = co.scan([], 'mbp');
-if(shoppingCart[0]) {
+      expect(co.getShoppingCart().length).to.equal(1);
+      expect(co.getShoppingCart()[0]["sku"]).to.equal('ipd');
+    });
 
-}
+
+    it('adds two items to the shopping cart with correct sku', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      //not a pure function
+      co.scan('ipd');
+      co.scan('ipd');
+
+      expect(co.getShoppingCart().length).to.equal(2);
+      expect(co.getShoppingCart()[0]["sku"]).to.equal('ipd');
+      expect(co.getShoppingCart()[1]["sku"]).to.equal('ipd');
+    });
+
+    it('adds three items to the shopping cart with correct skus', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      //not a pure function
+      co.scan('ipd');
+      co.scan('atv');
+      co.scan('vga');
+
+      expect(co.getShoppingCart().length).to.equal(3);
+      expect(co.getShoppingCart()[0]["sku"]).to.equal('ipd');
+      expect(co.getShoppingCart()[1]["sku"]).to.equal('atv');
+      expect(co.getShoppingCart()[2]["sku"]).to.equal('vga');
+    });
+
+  });
+
+  describe('Totalling prices', () => {
+    it('Calculates single item cost', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      co.scan('mbp');
+      expect(co.total()).to.equal(1399.99)
+    });
+
+    it('Calculates multiple item cost', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      co.scan('mbp');
+      co.scan('ipd');
+      co.scan('atv');
+
+      expect(co.total()).to.equal(1399.99+549.99+109.50)
+    });
+
+    it('Deducts free item price based on pricing rules', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      co.scan('mbp');
+      co.scan('vga');
+
+      expect(co.total()).to.equal(1399.99)
+    })
+  });
+
+});
