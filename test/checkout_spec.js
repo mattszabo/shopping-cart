@@ -14,8 +14,6 @@ var pricingRules = {
   "bulkDiscount": { "triggerSku": "ipd", "minItemCount": 4, "discountPrice": 499.99}
 }
 
-// var co = new Checkout(inventory, pricingRules);
-
 describe('Checkout logic', () => {
   describe('Scanning Items', () => {
 
