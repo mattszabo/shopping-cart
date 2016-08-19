@@ -5,7 +5,7 @@ module.exports = function Checkout(inventory, pricingRules) {
 
   this.inventory = inventory;
   this.pricingRules = pricingRules;
-
+  
   this.scan = function scan(shoppingCart, sku) {
 
     var newShoppingCart = this.copyCart(shoppingCart);

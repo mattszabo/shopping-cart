@@ -51,7 +51,7 @@ pricingRules = {
 
 co = new Checkout(inventory, pricingRules);
 console.log("\nTest scanning item that adds a free item");
-var shoppingCart = co.scan([], 'mbp');
+shoppingCart = co.scan([], 'mbp');
 if(shoppingCart.length != 2) {
   console.log("Failed. There should be 2 items, not: ", shoppingCart.length);
 }
@@ -60,4 +60,13 @@ if(shoppingCart[0]["sku"] === 'mbp' && shoppingCart[1]["sku"] === 'vga') {
   console.log(shoppingCart);
 } else {
   console.log("Failed. Expected to see 2 items with sku 'mbp' and 'vga'. Instead found:\n", shoppingCart[0]);
+}
+
+// TOTAL TEST
+pricingRules = {}
+co = new Checkout(inventory, pricingRules);
+console.log('\nTest tallying total');
+shoppingCart = co.scan([], 'mbp');
+if(shoppingCart[0]) {
+
 }
