@@ -48,10 +48,10 @@ module.exports = function Checkout(inventory, pricingRules) {
     var item;
     item = this.getItemFromSku(sku);
     priceDifference = item["price"] - discountPrice;
-    if (itemCount === x) {
-      totalPrice -= (priceDifference * x);
-    } else if (itemCount > x) {
-      totalPrice -= priceDifference;
+    if (itemCount === minItemCount) {
+      this.totalPrice -= (priceDifference * minItemCount);
+    } else if (itemCount > minItemCount) {
+      this.totalPrice -= priceDifference;
     }
   }
 

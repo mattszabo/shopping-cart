@@ -10,7 +10,8 @@ var inventory = [
 ];
 var pricingRules = {
   "freeItem": { "triggerSku": "mbp", "freeItemSku": "vga" },
-  "xForPriceOfY": { "triggerSku": "atv", "x": 3, "y": 2 }
+  "xForPriceOfY": { "triggerSku": "atv", "x": 3, "y": 2 },
+  "bulkDiscount": { "triggerSku": "ipd", "minItemCount": 4, "discountPrice": 499.99}
 }
 
 // var co = new Checkout(inventory, pricingRules);
@@ -28,7 +29,7 @@ describe('Checkout logic', () => {
     });
 
 
-    it('adds two items to the shopping cart with correct sku', () => {
+    it('adds two duplicate items to the shopping cart with correct sku', () => {
       var co = new Checkout(inventory, pricingRules);
 
       //not a pure function
@@ -40,17 +41,17 @@ describe('Checkout logic', () => {
       expect(co.getShoppingCart()[1]["sku"]).to.equal('ipd');
     });
 
-    it('adds three items to the shopping cart with correct skus', () => {
+    it('adds three items to the shopping cart (2 are duplicates) with correct skus', () => {
       var co = new Checkout(inventory, pricingRules);
 
       //not a pure function
       co.scan('ipd');
-      co.scan('atv');
+      co.scan('ipd');
       co.scan('vga');
 
       expect(co.getShoppingCart().length).to.equal(3);
       expect(co.getShoppingCart()[0]["sku"]).to.equal('ipd');
-      expect(co.getShoppingCart()[1]["sku"]).to.equal('atv');
+      expect(co.getShoppingCart()[1]["sku"]).to.equal('ipd');
       expect(co.getShoppingCart()[2]["sku"]).to.equal('vga');
     });
 
@@ -91,6 +92,17 @@ describe('Checkout logic', () => {
       co.scan('atv');
 
       expect(co.total()).to.equal(109.5 * 2);
+    })
+
+    it('Applies the bulk buy pricing rule', () => {
+      var co = new Checkout(inventory, pricingRules);
+
+      co.scan('ipd');
+      co.scan('ipd');
+      co.scan('ipd');
+      co.scan('ipd');
+
+      expect(co.total()).to.equal(499.99 * 4);
     })
   });
 
